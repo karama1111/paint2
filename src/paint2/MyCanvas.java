@@ -38,9 +38,6 @@ import javax.swing.event.ChangeListener;
 import javax.swing.ImageIcon;
 
 
-//TODO
-//jarファイル作ると画像読み込めない　下記参照
-//http://nowloading.blog.jp/archives/22904384.htm
 
 public class MyCanvas extends Canvas implements ChangeListener, ActionListener{
 	static final int WIDTH = 800;
@@ -64,7 +61,7 @@ public class MyCanvas extends Canvas implements ChangeListener, ActionListener{
 	JButton redoButton;
 	JButton fillButton;
 	JButton stampButton;
-	
+
 	BasicStroke wideStroke;
 	boolean isEraser = false;
 	boolean initFlag = false;
@@ -74,11 +71,11 @@ public class MyCanvas extends Canvas implements ChangeListener, ActionListener{
 	ArrayList<BufferedImage> undoStack = new ArrayList<BufferedImage>();
 	ArrayList<BufferedImage> redoStack = new ArrayList<BufferedImage>();
 	BufferedImage lastImage;
-	
+
 	PaintTool tool;
 	Pen pen;
 	Eraser eraser;
-	
+
 	JFrame stampFrame;
 	JPanel stampPanel;
 	JScrollPane scrollStampPane;
@@ -86,9 +83,9 @@ public class MyCanvas extends Canvas implements ChangeListener, ActionListener{
     int stampFrameHeight;
     ArrayList<JButton> stampButtons = new ArrayList<JButton>();
 	ArrayList<ImageIcon> stamps = new ArrayList<ImageIcon>();
-	
+
     String[] fileNames;
-	
+
 	public MyCanvas(){
 		JFrame frame = new JFrame();
 		frame.setTitle("ペイントソフト");
@@ -99,41 +96,41 @@ public class MyCanvas extends Canvas implements ChangeListener, ActionListener{
 		JPanel upperPanel = new JPanel();
 		upperPanel.setLayout(new FlowLayout());
 		frame.getContentPane().add(upperPanel, BorderLayout.NORTH);
-		
+
 		makeColorChooser(upperPanel);
 		frame.getContentPane().add(panel, BorderLayout.CENTER);
-		
+
 		makeButtons(upperPanel);
-		
+
 		setBackground(Color.white);
 		repaint();
 		panel.add(this);
 		setPreferredSize(new Dimension(WIDTH, HEIGHT));
-		
+
 		frame.pack();
 		frame.setVisible(true);
-		
+
 		//マウスアダプタ
 		myMouseAdapter = new MyMouseAdapter();
 		addMouseListener(myMouseAdapter);
 		addMouseMotionListener(myMouseAdapter);
-		
-		
-		
+
+
+
 		img = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_BGR);
 		bufferedg2 = img.createGraphics();
 		bufferedg2.setBackground(Color.white);
 		bufferedg2.clearRect(0, 0, WIDTH, HEIGHT);
 		undoStack.add(copyImage(img));
-		
+
 		penColor = colorChooser.getColor();
 	    colorLabel.setForeground(penColor);
 	    System.out.println(penColor);
-	    
+
 	    new Timer(200, taskPerformer).start();//画面サイズ変更などの際に画面が真っ白にならないように
-	    
+
 	    tool = new Pen(img);
-	    
+
 	    //スタンプ用サブフレーム
 	    //スタンプアイコンのボタンを載せる
 	    stampFrame = new JFrame("スタンプ");
@@ -149,15 +146,13 @@ public class MyCanvas extends Canvas implements ChangeListener, ActionListener{
 	    scrollStampPane = new JScrollPane(stampPanel, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 	    stampFrame.add(scrollStampPane);
 
-	    
-	   //test
 	    readStamps();
-	    
+
  	}
-	
+
 	private void makeButtons(JPanel upperPanel){
 		JPanel buttonsPanel = new JPanel();
-		
+
 		ImageIcon thinPenIcon = new ImageIcon(".\\icons\\thinPen.png");
 		ImageIcon mediumPenIcon = new ImageIcon(".\\icons\\mediumPen.png");
 		ImageIcon thickPenIcon = new ImageIcon(".\\icons\\thickPen.png");
@@ -177,7 +172,7 @@ public class MyCanvas extends Canvas implements ChangeListener, ActionListener{
 		buttonsPanel.add(thickButton);
 		buttonsPanel.add(eraserButton);
 		buttonsPanel.add(initButton);
-		
+
 		buttonsPanel.add(undoButton);
 		buttonsPanel.add(redoButton);
 		buttonsPanel.add(fillButton);
@@ -194,33 +189,12 @@ public class MyCanvas extends Canvas implements ChangeListener, ActionListener{
 		redoButton.addActionListener(this);
 		fillButton.addActionListener(this);
 		stampButton.addActionListener(this);
-		
+
 		saveButton.setVisible(false);
-		
-		// ここからテスト
-		/*
-		thinPenIcon=null;
-		mediumPenIcon = null; 
-		thickPenIcon = null;
-		Image im = null;
-		URL url=this.getClass().getResource("thinPen.png");
-		
-		System.out.println("url is " + url);
-		try {
-			im=this.createImage((ImageProducer) url.getContent());
-			if (im!=null) thinPenIcon=new ImageIcon(im);
-		}catch(Exception ex){
-			System.out.println("Resource Error");
-		}
-		//mediumButton.setText("" + url);
-		 
-		 */
-		//　ここまでテスト
-		
+
 	}
-	
+
 	private void makeColorChooser(JPanel upperPanel){
-		//カラーチューザー
 		colorChooser = new JColorChooser(Color.black);
 		colorChooser.getSelectionModel().addChangeListener(this);
 		JPanel colorPreviewPanel = new JPanel();
@@ -237,13 +211,13 @@ public class MyCanvas extends Canvas implements ChangeListener, ActionListener{
 		}
 		upperPanel.add(colorChooser);
 	}
-	
+
 	ActionListener taskPerformer = new ActionListener() {
 	      public void actionPerformed(ActionEvent evt) {
 	          repaint();
 	      }
 	};
-	
+
 	public void stateChanged(ChangeEvent e) {
 	    	colorLabel.setText("この色が選択されています");
 	    	System.out.println(tool);
@@ -255,8 +229,8 @@ public class MyCanvas extends Canvas implements ChangeListener, ActionListener{
 	    colorLabel.setForeground(penColor);
 	    System.out.println(penColor);
 	  }
-	
-	
+
+
 	public void update(Graphics g){
 		if(isUndo){
 			img = copyImage(lastImage);
@@ -272,7 +246,7 @@ public class MyCanvas extends Canvas implements ChangeListener, ActionListener{
 		}
 		if(myMouseAdapter.getIsg2Copy()){
 			undoStack.add(copyImage(img));
-			
+
 		}
 		if(initFlag){
 			bufferedg2.setBackground(Color.white);
@@ -280,19 +254,19 @@ public class MyCanvas extends Canvas implements ChangeListener, ActionListener{
 			initFlag = false;
 			undoStack.add(copyImage(img));
 		}
-		
+
 		g.drawImage(img, 0, 0, this);
 	}
-	
+
 	private BufferedImage copyImage(BufferedImage img) {
 	    BufferedImage copyOfImage = new BufferedImage(getSize().width, getSize().height, BufferedImage.TYPE_INT_RGB);
 		Graphics2D g2 = copyOfImage.createGraphics();
 	    g2.drawImage(img, 0, 0, getWidth(), getHeight(), null);
 	    return copyOfImage;
 	}
-	
+
 	public void actionPerformed(ActionEvent e){
-		
+
 		  if(e.getSource() == thinButton){
 			  tool = changeTool("Pen");
 			  tool.changeWidth(3);
@@ -319,7 +293,7 @@ public class MyCanvas extends Canvas implements ChangeListener, ActionListener{
 	            } catch ( Exception ex ) {
 	                ex.printStackTrace();
 	                System.out.println(ex);
-	                
+
 	            }
 		  }else if(e.getSource() == undoButton && undoStack.size() > 1){
 			  redoStack.add(undoStack.remove(undoStack.size()-1));
@@ -336,9 +310,6 @@ public class MyCanvas extends Canvas implements ChangeListener, ActionListener{
 			  //tool = changeTool("Stamp");
 			  stampFrame.setVisible(true);
 		  }
-//		  else if(e.getSource() == stampButtons.get(0)){
-//			  System.out.println(e.getSource());
-//		  }
 		  for(int i=0; i<fileNames.length-1; i++){
 			  if(e.getSource() == stampButtons.get(i)){
 				  tool = changeTool("Stamp");
@@ -347,7 +318,7 @@ public class MyCanvas extends Canvas implements ChangeListener, ActionListener{
 			  }
 		  }
 	}
-	
+
 	PaintTool changeTool(String newToolName){
 		String currentToolName = tool.getClass().getSimpleName();
 		if(newToolName.equals(currentToolName)){
@@ -355,7 +326,7 @@ public class MyCanvas extends Canvas implements ChangeListener, ActionListener{
 		}else{
 			return convertToolNameToTool(newToolName);
 		}
-		
+
 	}
 
 	PaintTool convertToolNameToTool(String toolName){
@@ -372,7 +343,7 @@ public class MyCanvas extends Canvas implements ChangeListener, ActionListener{
 			return new Pen(img);
 		}
 	}
-	
+
 	void readStamps(){
 		File file = new File(".\\stamps");
 		fileNames = file.list();
@@ -381,7 +352,7 @@ public class MyCanvas extends Canvas implements ChangeListener, ActionListener{
 			System.out.println(i);
 		}
 	}
-	
+
 	void addStampsToPanel(String fileName){
 			 ImageIcon icon = new ImageIcon(".\\stamps\\" + fileName);
 			 Image image = icon.getImage().getScaledInstance(stampFrameWidth/2-50, -1,Image.SCALE_SMOOTH);
@@ -391,6 +362,5 @@ public class MyCanvas extends Canvas implements ChangeListener, ActionListener{
 			 stampPanel.add(button);
 			 stamps.add(icon);
 			 stampButtons.add(button);
-		      
 	}
 }
